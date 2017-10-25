@@ -8,7 +8,7 @@ namespace Voxels {
         public static readonly Resources Resources = new Resources();
 
         private IntPtr _window;
-        private uint _buffer;
+        private uint _vao, _vbo;
 
         private void Init() {
             Glfw.SetErrorCallback((_, desc) => throw new Exception($"GLFW error: {desc}"));
@@ -32,16 +32,20 @@ namespace Voxels {
                 1f, -1f
             };
 
-            _buffer = Gl.GenBuffer();
-            Gl.BindBuffer(BufferTarget.ArrayBuffer, _buffer);
+            _vao = Gl.GenVertexArray();
+            Gl.BindVertexArray(_vao);
+            _vbo = Gl.GenBuffer();
+            Gl.BindBuffer(BufferTarget.ArrayBuffer, _vbo);
             Gl.BufferData(BufferTarget.ArrayBuffer, sizeof(float) * 6, positions, BufferUsage.StaticDraw);
             Gl.EnableVertexAttribArray(0);
             Gl.VertexAttribPointer(0, 2, VertexAttribType.Float, false, sizeof(float) * 2, IntPtr.Zero);
             Gl.BindBuffer(BufferTarget.ArrayBuffer, 0);
+            Gl.BindVertexArray(0);
         }
 
         public void Dispose() {
-            Gl.DeleteBuffers(_buffer);
+            Gl.DeleteBuffers(_vbo);
+            Gl.DeleteVertexArrays(_vao);
             Resources?.Dispose();
             Glfw.DestroyWindow(_window);
             Glfw.Terminate();
@@ -67,9 +71,9 @@ namespace Voxels {
                 Gl.Clear(ClearBufferMask.ColorBufferBit);
 
                 Gl.UseProgram(Resources.VoxelProgram);
-                Gl.BindBuffer(BufferTarget.ArrayBuffer, _buffer);
+                Gl.BindVertexArray(_vao);
                 Gl.DrawArrays(PrimitiveType.Triangles, 0, 3);
-                Gl.BindBuffer(BufferTarget.ArrayBuffer, 0);
+                Gl.BindVertexArray(0);
                 Gl.UseProgram(0);
 
                 Glfw.SwapInterval(1);
