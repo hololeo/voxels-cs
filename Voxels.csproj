@@ -8,8 +8,5 @@
     <Reference Include="OpenGL.Net, Version=0.4.0.0, Culture=neutral, PublicKeyToken=null">
       <HintPath>ThirdParty\OpenGL.Net.dll</HintPath>
     </Reference>
-    <Reference Include="OpenGL.Net.Objects, Version=0.3.2.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>ThirdParty\OpenGL.Net.Objects.dll</HintPath>
-    </Reference>
   </ItemGroup>
 </Project>

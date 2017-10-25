@@ -2,11 +2,9 @@
 using System.Diagnostics;
 using System.Threading.Tasks;
 using OpenGL;
-using OpenGL.Objects;
 
 namespace Voxels {
     public class Program : IDisposable {
-        public static readonly GraphicsContext Context = new GraphicsContext(DeviceContext.Create());
         public static readonly Resources Resources = new Resources();
 
         private IntPtr _window;
@@ -68,9 +66,11 @@ namespace Voxels {
                 Gl.ClearColor(1.0f, 0.5f, 0.2f, 1.0f);
                 Gl.Clear(ClearBufferMask.ColorBufferBit);
 
+                Gl.UseProgram(Resources.VoxelProgram);
                 Gl.BindBuffer(BufferTarget.ArrayBuffer, _buffer);
                 Gl.DrawArrays(PrimitiveType.Triangles, 0, 3);
                 Gl.BindBuffer(BufferTarget.ArrayBuffer, 0);
+                Gl.UseProgram(0);
 
                 Glfw.SwapInterval(1);
                 Glfw.SwapBuffers(_window);
