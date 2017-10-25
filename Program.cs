@@ -8,7 +8,8 @@ namespace Voxels {
         public static readonly Resources Resources = new Resources();
 
         private IntPtr _window;
-        private uint _vao, _vbo;
+        private ArrayBuffer<float> _vbo;
+        private uint _vao;
 
         private void Init() {
             Glfw.SetErrorCallback((_, desc) => throw new Exception($"GLFW error: {desc}"));
@@ -34,17 +35,12 @@ namespace Voxels {
 
             _vao = Gl.GenVertexArray();
             Gl.BindVertexArray(_vao);
-            _vbo = Gl.GenBuffer();
-            Gl.BindBuffer(BufferTarget.ArrayBuffer, _vbo);
-            Gl.BufferData(BufferTarget.ArrayBuffer, sizeof(float) * 6, positions, BufferUsage.StaticDraw);
-            Gl.EnableVertexAttribArray(0);
-            Gl.VertexAttribPointer(0, 2, VertexAttribType.Float, false, sizeof(float) * 2, IntPtr.Zero);
-            Gl.BindBuffer(BufferTarget.ArrayBuffer, 0);
+            _vbo = new ArrayBuffer<float>(positions, BufferUsage.StaticDraw);
             Gl.BindVertexArray(0);
         }
 
         public void Dispose() {
-            Gl.DeleteBuffers(_vbo);
+            _vbo?.Dispose();
             Gl.DeleteVertexArrays(_vao);
             Resources?.Dispose();
             Glfw.DestroyWindow(_window);
