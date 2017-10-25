@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Threading.Tasks;
 using OpenGL;
 using OpenGL.Objects;
 
@@ -9,6 +10,7 @@ namespace Voxels {
         public static readonly Resources Resources = new Resources();
 
         private IntPtr _window;
+        private uint _buffer;
 
         private void Init() {
             Glfw.SetErrorCallback((_, desc) => throw new Exception($"GLFW error: {desc}"));
@@ -25,9 +27,23 @@ namespace Voxels {
             Glfw.ShowWindow(_window);
 
             Resources.Load();
+
+            var positions = new[] {
+                -1f, -1f,
+                0f, 1f,
+                1f, -1f
+            };
+
+            _buffer = Gl.GenBuffer();
+            Gl.BindBuffer(BufferTarget.ArrayBuffer, _buffer);
+            Gl.BufferData(BufferTarget.ArrayBuffer, sizeof(float) * 6, positions, BufferUsage.StaticDraw);
+            Gl.EnableVertexAttribArray(0);
+            Gl.VertexAttribPointer(0, 2, VertexAttribType.Float, false, sizeof(float) * 2, IntPtr.Zero);
+            Gl.BindBuffer(BufferTarget.ArrayBuffer, 0);
         }
 
         public void Dispose() {
+            Gl.DeleteBuffers(_buffer);
             Resources?.Dispose();
             Glfw.DestroyWindow(_window);
             Glfw.Terminate();
@@ -51,6 +67,11 @@ namespace Voxels {
 
                 Gl.ClearColor(1.0f, 0.5f, 0.2f, 1.0f);
                 Gl.Clear(ClearBufferMask.ColorBufferBit);
+
+                Gl.BindBuffer(BufferTarget.ArrayBuffer, _buffer);
+                Gl.DrawArrays(PrimitiveType.Triangles, 0, 3);
+                Gl.BindBuffer(BufferTarget.ArrayBuffer, 0);
+
                 Glfw.SwapInterval(1);
                 Glfw.SwapBuffers(_window);
                 Glfw.PollEvents();
