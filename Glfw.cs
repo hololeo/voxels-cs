@@ -47,10 +47,16 @@ namespace Voxels {
         [DllImport(_dlname, EntryPoint = "glfwPollEvents")]
         public static extern void PollEvents();
 
+        [DllImport(_dlname, EntryPoint = "glfwSwapInterval")]
+        public static extern void SwapInterval(int interval);
+
         [DllImport(_dlname, EntryPoint = "glfwSwapBuffers")]
         public static extern void SwapBuffers(IntPtr window);
 
         [DllImport(_dlname, EntryPoint = "glfwWindowShouldClose")]
         public static extern bool WindowShouldClose(IntPtr window);
+
+        [DllImport(_dlname, EntryPoint = "glfwMakeContextCurrent")]
+        public static extern void MakeContextCurrent(IntPtr window);
     }
 }

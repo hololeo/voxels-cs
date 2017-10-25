@@ -1,6 +1,12 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <TargetFramework>net47</TargetFramework>
+    <LangVersion>7.1</LangVersion>
   </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="OpenGL.Net, Version=0.4.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>ThirdParty\OpenGL.Net.dll</HintPath>
+    </Reference>
+  </ItemGroup>
 </Project>
