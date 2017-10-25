@@ -1,15 +1,14 @@
 ﻿using System;
-using System.IO;
 using System.Diagnostics;
-using System.Threading.Tasks;
 using OpenGL;
 using OpenGL.Objects;
 
 namespace Voxels {
     public class Program : IDisposable {
+        public static readonly GraphicsContext Context = new GraphicsContext(DeviceContext.Create());
+        public static readonly Resources Resources = new Resources();
+
         private IntPtr _window;
-        private Shader _shader;
-        private ShaderProgram _program;
 
         private void Init() {
             Glfw.SetErrorCallback((_, desc) => throw new Exception($"GLFW error: {desc}"));
@@ -17,8 +16,7 @@ namespace Voxels {
 
             Glfw.WindowHint(WindowHint.Resizable, 0);
             Glfw.WindowHint(WindowHint.Visible, 0);
-            Glfw.WindowHint(WindowHint.OpenGLProfile,
-                (int) OpenGLProfile.Core);
+            Glfw.WindowHint(WindowHint.OpenGLProfile, (int) OpenGLProfile.Core);
             Glfw.WindowHint(WindowHint.ContextVersionMajor, 4);
             Glfw.WindowHint(WindowHint.ContextVersionMinor, 3);
             _window = Glfw.CreateWindow(800, 450, "My Window", IntPtr.Zero, IntPtr.Zero);
@@ -26,20 +24,11 @@ namespace Voxels {
             Glfw.MakeContextCurrent(_window);
             Glfw.ShowWindow(_window);
 
-            var ctx = new GraphicsContext(DeviceContext.Create());
-            var lines = File.ReadAllLines("Assets/Vertex.glsl");
-
-            _shader = new Shader(ShaderType.VertexShader);
-            _shader.LoadSource(lines);
-            _shader.Create(ctx);
-            _program = new ShaderProgram("program");
-            _program.AttachShader(_shader);
-            _program.Create(ctx);
+            Resources.Load();
         }
 
         public void Dispose() {
-            _shader?.Dispose();
-            _program?.Dispose();
+            Resources?.Dispose();
             Glfw.DestroyWindow(_window);
             Glfw.Terminate();
         }
