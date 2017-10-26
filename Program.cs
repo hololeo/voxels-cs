@@ -14,7 +14,7 @@ namespace Voxels {
         public static readonly Resources Resources = new Resources();
 
         private IntPtr _window;
-        private ArrayBuffer<Vertex> _vbo;
+        private ArrayBuffer _vbo = new ArrayBuffer();
         private uint _vao;
 
         private void Init() {
@@ -41,7 +41,7 @@ namespace Voxels {
 
             _vao = Gl.GenVertexArray();
             Gl.BindVertexArray(_vao);
-            _vbo = new ArrayBuffer<Vertex>(positions, BufferUsage.StaticDraw);
+            _vbo.CreateAsVertices(positions, BufferUsage.StaticDraw);
             Gl.BindVertexArray(0);
         }
 

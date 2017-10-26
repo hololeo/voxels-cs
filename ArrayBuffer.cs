@@ -6,23 +6,26 @@ using System.Runtime.InteropServices;
 using OpenGL;
 
 namespace Voxels {
-    public class ArrayBuffer<T> : IDisposable where T : struct {
+    public class ArrayBuffer : IDisposable {
         public uint Vbo => _vbo;
 
         private uint _vbo;
 
-        public ArrayBuffer(IEnumerable<T> positions, int components, VertexAttribType type, BufferUsage usage) {
+        public ArrayBuffer CreateAsUnique<T>(IEnumerable<T> data, int components, VertexAttribType type, BufferUsage usage)
+            where T : struct {
             var typeSize = Marshal.SizeOf<T>();
-            var bufferSize = typeSize * positions.Count();
+            var bufferSize = typeSize * data.Count();
             _vbo = Gl.GenBuffer();
             Gl.BindBuffer(BufferTarget.ArrayBuffer, _vbo);
-            Gl.BufferData(BufferTarget.ArrayBuffer, (uint) bufferSize, positions, usage);
+            Gl.BufferData(BufferTarget.ArrayBuffer, (uint) bufferSize, data, usage);
             Gl.EnableVertexAttribArray(0);
             Gl.VertexAttribPointer(0, components, type, false, typeSize * components, IntPtr.Zero);
             Gl.BindBuffer(BufferTarget.ArrayBuffer, 0);
+            return this;
         }
 
-        public ArrayBuffer(IEnumerable<T> vertices, BufferUsage usage) {
+        public ArrayBuffer CreateAsVertices<T>(IEnumerable<T> vertices, BufferUsage usage)
+            where T : struct {
             var typeSize = Marshal.SizeOf<T>();
             var bufferSize = typeSize * vertices.Count();
             _vbo = Gl.GenBuffer();
@@ -36,6 +39,7 @@ namespace Voxels {
                     (int) (attrib.ComponentSize * attrib.Count), new IntPtr(attrib.Offset));
             }
             Gl.BindBuffer(BufferTarget.ArrayBuffer, 0);
+            return this;
         }
 
         public void Dispose() {
