@@ -1,14 +1,20 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Net.Mime;
+using System.Numerics;
 using System.Threading.Tasks;
 using OpenGL;
 
 namespace Voxels {
+    public struct Vertex {
+        [VertexAttrib(0, 2, typeof(float))] public Vector2 Position;
+    }
+
     public class Program : IDisposable {
         public static readonly Resources Resources = new Resources();
 
         private IntPtr _window;
-        private ArrayBuffer<float> _vbo;
+        private ArrayBuffer<Vertex> _vbo;
         private uint _vao;
 
         private void Init() {
@@ -28,14 +34,14 @@ namespace Voxels {
             Resources.Load();
 
             var positions = new[] {
-                -1f, -1f,
-                0f, 1f,
-                1f, -1f
+                new Vertex { Position = new Vector2(-1f, -1f) },
+                new Vertex { Position = new Vector2(0f, 1f) },
+                new Vertex { Position = new Vector2(1f, -1f) }
             };
 
             _vao = Gl.GenVertexArray();
             Gl.BindVertexArray(_vao);
-            _vbo = new ArrayBuffer<float>(positions, 2, VertexAttribType.Float, BufferUsage.StaticDraw);
+            _vbo = new ArrayBuffer<Vertex>(positions, BufferUsage.StaticDraw);
             Gl.BindVertexArray(0);
         }
 
