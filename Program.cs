@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Diagnostics;
 using OpenTK;
+using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL4;
+using OpenTK.Input;
 
 namespace Voxels {
     public struct Vertex {
@@ -11,22 +13,15 @@ namespace Voxels {
     public class Program : IDisposable {
         public static readonly Resources Resources = new Resources();
 
-        private IntPtr _window;
+        private GameWindow _window;
         private VertexArray _vao = new VertexArray();
 
         private void Init() {
-            Glfw.SetErrorCallback((_, desc) => throw new Exception($"GLFW error: {desc}"));
-            Glfw.Init();
-
-            Glfw.WindowHint(WindowHint.Resizable, 0);
-            Glfw.WindowHint(WindowHint.Visible, 0);
-            Glfw.WindowHint(WindowHint.OpenGLProfile, (int) OpenGLProfile.Core);
-            Glfw.WindowHint(WindowHint.ContextVersionMajor, 4);
-            Glfw.WindowHint(WindowHint.ContextVersionMinor, 3);
-            _window = Glfw.CreateWindow(800, 450, "My Window", IntPtr.Zero, IntPtr.Zero);
-            Glfw.MakeContextCurrent(_window);
-            Glfw.ShowWindow(_window);
-
+            _window = new GameWindow(800, 450, GraphicsMode.Default, "Voxels", GameWindowFlags.FixedWindow,
+                DisplayDevice.Default, 4, 6, GraphicsContextFlags.ForwardCompatible) {
+                VSync = VSyncMode.Adaptive, Visible = true
+            };
+            _window.MakeCurrent();
 
             Resources.Load();
 
@@ -44,8 +39,6 @@ namespace Voxels {
         public void Dispose() {
             _vao?.Dispose();
             Resources?.Dispose();
-            Glfw.DestroyWindow(_window);
-            Glfw.Terminate();
         }
 
         private void Run() {
@@ -60,7 +53,7 @@ namespace Voxels {
             var lastTime = timewatch.Elapsed;
             var fps = 0;
 
-            while (!Glfw.WindowShouldClose(_window)) {
+            while (!_window.IsExiting) {
                 var delta = (float) ((timewatch.Elapsed - lastTime).Ticks / (double) TimeSpan.TicksPerSecond);
                 lastTime = timewatch.Elapsed;
 
@@ -73,9 +66,8 @@ namespace Voxels {
                 GL.BindVertexArray(0);
                 GL.UseProgram(0);
 
-                Glfw.SwapInterval(1);
-                Glfw.SwapBuffers(_window);
-                Glfw.PollEvents();
+                _window.SwapBuffers();
+                _window.ProcessEvents();
                 fps++;
 
                 if (framewatch.ElapsedMilliseconds < 1000) continue;
