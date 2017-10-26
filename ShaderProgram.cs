@@ -10,9 +10,9 @@ namespace Voxels {
 
         public ShaderProgram Create(ShaderType type, string path) {
             _prog = GL.CreateShaderProgram(type, 1, new[] {File.ReadAllText(path)});
-            GL.GetProgram(_prog, GetProgramParameterName.InfoLogLength, out var length);
-            if (length == 0) return this;
-            throw new Exception($"Could not make shader program '{path}':\n{GL.GetShaderInfoLog(_prog)}");
+            var infoLog = GL.GetShaderInfoLog(_prog);
+            if (string.IsNullOrWhiteSpace(infoLog)) return this;
+            throw new Exception($"Could not make shader program '{path}':\n{infoLog}");
         }
 
         public void Dispose() {

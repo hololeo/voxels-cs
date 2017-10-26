@@ -15,6 +15,7 @@ namespace Voxels {
 
         private GameWindow _window;
         private VertexArray _vao = new VertexArray();
+        private int _ppo;
 
         private void Init() {
             _window = new GameWindow(800, 450, GraphicsMode.Default, "Voxels", GameWindowFlags.FixedWindow,
@@ -34,9 +35,17 @@ namespace Voxels {
             _vao.Create(() => new[] {
                  new ArrayBuffer().CreateAsVertices(positions, BufferUsageHint.StaticDraw)
             });
+
+            _ppo = GL.GenProgramPipeline();
+            GL.UseProgramStages(_ppo, ProgramStageMask.VertexShaderBit, Resources.VoxelVS.ProgramID);
+            GL.UseProgramStages(_ppo, ProgramStageMask.FragmentShaderBit, Resources.VoxelFS.ProgramID);
+
+            var color = GL.GetUniformLocation(Resources.VoxelFS.ProgramID, "u_color");
+            GL.ProgramUniform3(Resources.VoxelFS.ProgramID, color, 0.2f, 0.5f, 1.0f);
         }
 
         public void Dispose() {
+            if (GL.IsProgramPipeline(_ppo)) GL.DeleteProgramPipeline(_ppo);
             _vao?.Dispose();
             Resources?.Dispose();
         }
@@ -60,11 +69,11 @@ namespace Voxels {
                 GL.ClearColor(1.0f, 0.5f, 0.2f, 1.0f);
                 GL.Clear(ClearBufferMask.ColorBufferBit);
 
-                GL.UseProgram(Resources.VoxelProgram);
+                GL.BindProgramPipeline(_ppo);
                 GL.BindVertexArray(_vao.Vao);
                 GL.DrawArrays(PrimitiveType.Triangles, 0, 3);
                 GL.BindVertexArray(0);
-                GL.UseProgram(0);
+                GL.BindProgramPipeline(0);
 
                 _window.SwapBuffers();
                 _window.ProcessEvents();
