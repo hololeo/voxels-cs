@@ -5,8 +5,6 @@
     <LangVersion>7.1</LangVersion>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="OpenGL.Net, Version=0.4.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>ThirdParty\OpenGL.Net.dll</HintPath>
-    </Reference>
+    <PackageReference Include="OpenTK.NETCore" Version="1.1.2749.6433" />
   </ItemGroup>
 </Project>

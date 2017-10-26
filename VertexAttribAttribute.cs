@@ -1,27 +1,28 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using OpenGL;
+using OpenTK.Graphics.OpenGL4;
 
 namespace Voxels {
     [AttributeUsage(AttributeTargets.Field)]
     public class VertexAttribAttribute : Attribute {
-        public uint Index { get; set; }
-        public int Count { get; set; }
-        public uint ComponentSize { get; set; }
-        public VertexAttribType ComponentType { get; set;}
+        public int Index { get; private set; }
+        public int Count { get; private set; }
+        public int ComponentSize { get; private set; }
+        public VertexAttribPointerType ComponentType { get; private set; }
         public int Offset { get; set; } = 0;
 
-        public VertexAttribAttribute(uint index, int count, Type type) {
+        public VertexAttribAttribute(int index, int count, Type type) {
             Index = index;
             Count = count;
 
-            ComponentSize = (uint) Marshal.SizeOf(type);
+            ComponentSize = Marshal.SizeOf(type);
             ComponentType = Lookup[type];
         }
 
-        private static readonly IDictionary<Type, VertexAttribType> Lookup = new Dictionary<Type, VertexAttribType> {
-            [typeof(float)] = VertexAttribType.Float
+        private static readonly IDictionary<Type, VertexAttribPointerType> Lookup
+            = new Dictionary<Type, VertexAttribPointerType> {
+            [typeof(float)] = VertexAttribPointerType.Float
         };
     }
 }

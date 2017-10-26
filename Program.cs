@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Numerics;
-using OpenGL;
+using OpenTK;
+using OpenTK.Graphics.OpenGL4;
 
 namespace Voxels {
     public struct Vertex {
@@ -24,9 +24,9 @@ namespace Voxels {
             Glfw.WindowHint(WindowHint.ContextVersionMajor, 4);
             Glfw.WindowHint(WindowHint.ContextVersionMinor, 3);
             _window = Glfw.CreateWindow(800, 450, "My Window", IntPtr.Zero, IntPtr.Zero);
-            Gl.Initialize();
             Glfw.MakeContextCurrent(_window);
             Glfw.ShowWindow(_window);
+
 
             Resources.Load();
 
@@ -37,7 +37,7 @@ namespace Voxels {
             };
 
             _vao.Create(() => new[] {
-                 new ArrayBuffer().CreateAsVertices(positions, BufferUsage.StaticDraw)
+                 new ArrayBuffer().CreateAsVertices(positions, BufferUsageHint.StaticDraw)
             });
         }
 
@@ -49,9 +49,9 @@ namespace Voxels {
         }
 
         private void Run() {
-            Console.WriteLine("OpenGL Version: " + Gl.CurrentVersion);
-            Console.WriteLine("OpenGL Vendor: " + Gl.CurrentVendor);
-            Console.WriteLine("OpenGL Renderer: " + Gl.CurrentRenderer);
+            Console.WriteLine("OpenGL Version: " + GL.GetString(StringName.Version));
+            Console.WriteLine("OpenGL Vendor: " + GL.GetString(StringName.Vendor));
+            Console.WriteLine("OpenGL Renderer: " + GL.GetString(StringName.Renderer));
 
             var timewatch = new Stopwatch();
             var framewatch = new Stopwatch();
@@ -64,14 +64,14 @@ namespace Voxels {
                 var delta = (float) ((timewatch.Elapsed - lastTime).Ticks / (double) TimeSpan.TicksPerSecond);
                 lastTime = timewatch.Elapsed;
 
-                Gl.ClearColor(1.0f, 0.5f, 0.2f, 1.0f);
-                Gl.Clear(ClearBufferMask.ColorBufferBit);
+                GL.ClearColor(1.0f, 0.5f, 0.2f, 1.0f);
+                GL.Clear(ClearBufferMask.ColorBufferBit);
 
-                Gl.UseProgram(Resources.VoxelProgram);
-                Gl.BindVertexArray(_vao.Vao);
-                Gl.DrawArrays(PrimitiveType.Triangles, 0, 3);
-                Gl.BindVertexArray(0);
-                Gl.UseProgram(0);
+                GL.UseProgram(Resources.VoxelProgram);
+                GL.BindVertexArray(_vao.Vao);
+                GL.DrawArrays(PrimitiveType.Triangles, 0, 3);
+                GL.BindVertexArray(0);
+                GL.UseProgram(0);
 
                 Glfw.SwapInterval(1);
                 Glfw.SwapBuffers(_window);

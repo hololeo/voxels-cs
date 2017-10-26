@@ -3,47 +3,47 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using OpenGL;
+using OpenTK.Graphics.OpenGL4;
 
 namespace Voxels {
     public class ArrayBuffer : IDisposable {
-        public uint Vbo => _vbo;
+        public int Vbo => _vbo;
 
-        private uint _vbo;
+        private int _vbo;
 
-        public ArrayBuffer CreateAsUnique<T>(IEnumerable<T> data, int components, VertexAttribType type, BufferUsage usage)
+        public ArrayBuffer CreateAsUnique<T>(T[] data, int components, VertexAttribPointerType type, BufferUsageHint usage)
             where T : struct {
             var typeSize = Marshal.SizeOf<T>();
-            var bufferSize = typeSize * data.Count();
-            _vbo = Gl.GenBuffer();
-            Gl.BindBuffer(BufferTarget.ArrayBuffer, _vbo);
-            Gl.BufferData(BufferTarget.ArrayBuffer, (uint) bufferSize, data, usage);
-            Gl.EnableVertexAttribArray(0);
-            Gl.VertexAttribPointer(0, components, type, false, typeSize * components, IntPtr.Zero);
-            Gl.BindBuffer(BufferTarget.ArrayBuffer, 0);
+            var bufferSize = typeSize * data.Length;
+            _vbo = GL.GenBuffer();
+            GL.BindBuffer(BufferTarget.ArrayBuffer, _vbo);
+            GL.BufferData(BufferTarget.ArrayBuffer, bufferSize, data, usage);
+            GL.EnableVertexAttribArray(0);
+            GL.VertexAttribPointer(0, components, type, false, typeSize * components, IntPtr.Zero);
+            GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
             return this;
         }
 
-        public ArrayBuffer CreateAsVertices<T>(IEnumerable<T> vertices, BufferUsage usage)
+        public ArrayBuffer CreateAsVertices<T>(T[] vertices, BufferUsageHint usage)
             where T : struct {
             var typeSize = Marshal.SizeOf<T>();
-            var bufferSize = typeSize * vertices.Count();
-            _vbo = Gl.GenBuffer();
-            Gl.BindBuffer(BufferTarget.ArrayBuffer, _vbo);
-            Gl.BufferData(BufferTarget.ArrayBuffer, (uint) bufferSize, vertices, usage);
+            var bufferSize = typeSize * vertices.Length;
+            _vbo = GL.GenBuffer();
+            GL.BindBuffer(BufferTarget.ArrayBuffer, _vbo);
+            GL.BufferData(BufferTarget.ArrayBuffer, bufferSize, vertices, usage);
             foreach (var field in typeof(T).GetFields()) {
                 var attrib = field.GetCustomAttribute<VertexAttribAttribute>();
                 if (attrib == null) continue;
-                Gl.EnableVertexAttribArray(attrib.Index);
-                Gl.VertexAttribPointer(attrib.Index, attrib.Count, attrib.ComponentType, false,
-                    (int) (attrib.ComponentSize * attrib.Count), new IntPtr(attrib.Offset));
+                GL.EnableVertexAttribArray(attrib.Index);
+                GL.VertexAttribPointer(attrib.Index, attrib.Count, attrib.ComponentType, false,
+                    attrib.ComponentSize * attrib.Count, new IntPtr(attrib.Offset));
             }
-            Gl.BindBuffer(BufferTarget.ArrayBuffer, 0);
+            GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
             return this;
         }
 
         public void Dispose() {
-            if (Gl.IsBuffer(_vbo)) Gl.DeleteBuffers(_vbo);
+            if (GL.IsBuffer(_vbo)) GL.DeleteBuffer(_vbo);
         }
     }
 }
