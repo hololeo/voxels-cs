@@ -27,9 +27,9 @@ namespace Voxels {
             Resources.Load();
 
             var positions = new[] {
-                new Vertex { Position = new Vector2(-1f, -1f) },
-                new Vertex { Position = new Vector2(0f, 1f) },
-                new Vertex { Position = new Vector2(1f, -1f) }
+                new Vertex { Position = new Vector2(-0.5f, -0.5f) },
+                new Vertex { Position = new Vector2(0f, 0.5f) },
+                new Vertex { Position = new Vector2(0.5f, -0.5f) }
             };
 
             _vao.Create(() => new[] {
@@ -39,6 +39,7 @@ namespace Voxels {
             _ppo = GL.GenProgramPipeline();
             GL.UseProgramStages(_ppo, ProgramStageMask.VertexShaderBit, Resources.VoxelVS.ProgramID);
             GL.UseProgramStages(_ppo, ProgramStageMask.FragmentShaderBit, Resources.VoxelFS.ProgramID);
+            GL.UseProgramStages(_ppo, ProgramStageMask.GeometryShaderBit, Resources.SolidBlockGS.ProgramID);
 
             var color = GL.GetUniformLocation(Resources.VoxelFS.ProgramID, "u_color");
             GL.ProgramUniform3(Resources.VoxelFS.ProgramID, color, 0.2f, 0.5f, 1.0f);
@@ -71,7 +72,7 @@ namespace Voxels {
 
                 GL.BindProgramPipeline(_ppo);
                 GL.BindVertexArray(_vao.Vao);
-                GL.DrawArrays(PrimitiveType.Triangles, 0, 3);
+                GL.DrawArrays(PrimitiveType.Points, 0, 3);
                 GL.BindVertexArray(0);
                 GL.BindProgramPipeline(0);
 
