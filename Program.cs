@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Net.Mime;
 using System.Numerics;
-using System.Threading.Tasks;
 using OpenGL;
 
 namespace Voxels {
@@ -14,8 +12,7 @@ namespace Voxels {
         public static readonly Resources Resources = new Resources();
 
         private IntPtr _window;
-        private ArrayBuffer _vbo = new ArrayBuffer();
-        private uint _vao;
+        private VertexArray _vao = new VertexArray();
 
         private void Init() {
             Glfw.SetErrorCallback((_, desc) => throw new Exception($"GLFW error: {desc}"));
@@ -39,15 +36,13 @@ namespace Voxels {
                 new Vertex { Position = new Vector2(1f, -1f) }
             };
 
-            _vao = Gl.GenVertexArray();
-            Gl.BindVertexArray(_vao);
-            _vbo.CreateAsVertices(positions, BufferUsage.StaticDraw);
-            Gl.BindVertexArray(0);
+            _vao.Create(() => new[] {
+                 new ArrayBuffer().CreateAsVertices(positions, BufferUsage.StaticDraw)
+            });
         }
 
         public void Dispose() {
-            _vbo?.Dispose();
-            Gl.DeleteVertexArrays(_vao);
+            _vao?.Dispose();
             Resources?.Dispose();
             Glfw.DestroyWindow(_window);
             Glfw.Terminate();
@@ -73,7 +68,7 @@ namespace Voxels {
                 Gl.Clear(ClearBufferMask.ColorBufferBit);
 
                 Gl.UseProgram(Resources.VoxelProgram);
-                Gl.BindVertexArray(_vao);
+                Gl.BindVertexArray(_vao.Vao);
                 Gl.DrawArrays(PrimitiveType.Triangles, 0, 3);
                 Gl.BindVertexArray(0);
                 Gl.UseProgram(0);
