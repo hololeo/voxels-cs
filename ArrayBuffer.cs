@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using OpenGL;
 
 namespace Voxels {
@@ -8,12 +9,14 @@ namespace Voxels {
 
         private uint _vbo;
 
-        public ArrayBuffer(IEnumerable<T> data, BufferUsage usage) {
+        public ArrayBuffer(IEnumerable<T> positions, int components, VertexAttribType type, BufferUsage usage) {
+            var typeSize = Marshal.SizeOf<T>();
+            var bufferSize = typeSize * components;
             _vbo = Gl.GenBuffer();
             Gl.BindBuffer(BufferTarget.ArrayBuffer, _vbo);
-            Gl.BufferData(BufferTarget.ArrayBuffer, sizeof(float) * 6, data, usage);
+            Gl.BufferData(BufferTarget.ArrayBuffer, (uint) bufferSize, positions, usage);
             Gl.EnableVertexAttribArray(0);
-            Gl.VertexAttribPointer(0, 2, VertexAttribType.Float, false, sizeof(float) * 2, IntPtr.Zero);
+            Gl.VertexAttribPointer(0, components, type, false, typeSize, IntPtr.Zero);
             Gl.BindBuffer(BufferTarget.ArrayBuffer, 0);
         }
 

@@ -35,7 +35,7 @@ namespace Voxels {
 
             _vao = Gl.GenVertexArray();
             Gl.BindVertexArray(_vao);
-            _vbo = new ArrayBuffer<float>(positions, BufferUsage.StaticDraw);
+            _vbo = new ArrayBuffer<float>(positions, 2, VertexAttribType.Float, BufferUsage.StaticDraw);
             Gl.BindVertexArray(0);
         }
 
