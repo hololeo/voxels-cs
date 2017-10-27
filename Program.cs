@@ -15,6 +15,7 @@ namespace Voxels {
 
         private GameWindow _window;
         private VertexArray _vao = new VertexArray();
+        private World _world = new World();
         private int _ppo;
 
         private void Init() {
@@ -43,6 +44,8 @@ namespace Voxels {
 
             var color = GL.GetUniformLocation(Resources.VoxelFS.ProgramID, "u_color");
             GL.ProgramUniform3(Resources.VoxelFS.ProgramID, color, 0.2f, 0.5f, 1.0f);
+
+            _world.GenerateChunk(1, 1, 1);
         }
 
         public void Dispose() {
