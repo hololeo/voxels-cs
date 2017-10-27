@@ -67,7 +67,6 @@ namespace Voxels {
                 var delta = (float) ((timewatch.Elapsed - lastTime).Ticks / (double) TimeSpan.TicksPerSecond);
                 lastTime = timewatch.Elapsed;
 
-                GL.ClearColor(1.0f, 0.5f, 0.2f, 1.0f);
                 GL.Clear(ClearBufferMask.ColorBufferBit);
 
                 GL.BindProgramPipeline(_ppo);
