@@ -16,7 +16,8 @@ namespace Voxels {
         private VertexArray _vao;
         private int _ppo;
         private Camera camera = new Camera {
-            Position = new Vector3(-10, 10, -10),
+            Position = new Vector3(0f, 0f, -10f),
+            Direction = new Vector3(0.5f, -1f, -1f),
             Fov = 90f,
             AspectRatio = Program.AspectRatio
         };
@@ -43,13 +44,10 @@ namespace Voxels {
             var colorLocation = GL.GetUniformLocation(Program.Resources.VoxelFS.ProgramID, "u_color");
             GL.ProgramUniform3(Program.Resources.VoxelFS.ProgramID, colorLocation, 0.2f, 0.5f, 1.0f);
 
-            var viewLocation = GL.GetUniformLocation(Program.Resources.VoxelVS.ProgramID, "u_view");
-            var projectionLocation = GL.GetUniformLocation(Program.Resources.VoxelVS.ProgramID, "u_proj");
+            var viewProjLocation = GL.GetUniformLocation(Program.Resources.SolidBlockGS.ProgramID, "u_viewProj");
             var floats = new float[16];
-            Helper.MatrixToFloats(camera.View, floats);
-            GL.ProgramUniformMatrix4(Program.Resources.VoxelVS.ProgramID, viewLocation, 1, false, floats);
-            Helper.MatrixToFloats(camera.Projection, floats);
-            GL.ProgramUniformMatrix4(Program.Resources.VoxelVS.ProgramID, projectionLocation, 1, false, floats);
+            Helper.MatrixToFloats(camera.CalculateViewProjectionMatrix(), floats);
+            GL.ProgramUniformMatrix4(Program.Resources.SolidBlockGS.ProgramID, viewProjLocation, 1, true, floats);
         }
 
         public void Dispose() {
