@@ -49,8 +49,10 @@ namespace Voxels {
             GL.UseProgramStages(_ppo, ProgramStageMask.FragmentShaderBit, Program.Resources.VoxelFS.ProgramID);
             GL.UseProgramStages(_ppo, ProgramStageMask.GeometryShaderBit, Program.Resources.SolidBlockGS.ProgramID);
 
-            var colorLocation = GL.GetUniformLocation(Program.Resources.VoxelFS.ProgramID, "u_color");
-            GL.ProgramUniform3(Program.Resources.VoxelFS.ProgramID, colorLocation, 0.2f, 0.5f, 1.0f);
+            var colorLocation = GL.GetUniformLocation(Program.Resources.SolidBlockGS.ProgramID, "u_primaryColor");
+            GL.ProgramUniform3(Program.Resources.SolidBlockGS.ProgramID, colorLocation, 0.2f, 0.5f, 1.0f);
+            colorLocation = GL.GetUniformLocation(Program.Resources.SolidBlockGS.ProgramID, "u_secondaryColor");
+            GL.ProgramUniform3(Program.Resources.SolidBlockGS.ProgramID, colorLocation, 0.1f, 0.25f, 0.5f);
         }
 
         public void Dispose() {
