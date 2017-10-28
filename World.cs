@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using OpenTK;
 using OpenTK.Graphics.OpenGL4;
+using OpenTK.Input;
 
 namespace Voxels {
     public struct VoxelVertex {
@@ -15,12 +15,14 @@ namespace Voxels {
         private Dictionary<(int, int, int), Voxel> _voxels = new Dictionary<(int, int, int), Voxel>();
         private VertexArray _vao;
         private int _ppo;
-        private Camera camera = new Camera {
+        private Camera _camera = new Camera {
             Position = new Vector3(0f, 0f, -10f),
-            Direction = new Vector3(0.5f, -1f, -1f),
+            Direction = Vector3.Zero,
             Fov = 90f,
             AspectRatio = Program.AspectRatio
         };
+        private const float _cameraMovementSpeed = 8f, _cameraRotationSpeed = 8f;
+        private int _lastMouseX = -1, _lastMouseY = -1;
 
         public World() {
             _vao = VertexArray.Create(() => {
@@ -43,18 +45,36 @@ namespace Voxels {
 
             var colorLocation = GL.GetUniformLocation(Program.Resources.VoxelFS.ProgramID, "u_color");
             GL.ProgramUniform3(Program.Resources.VoxelFS.ProgramID, colorLocation, 0.2f, 0.5f, 1.0f);
-
-            var viewProjLocation = GL.GetUniformLocation(Program.Resources.SolidBlockGS.ProgramID, "u_viewProj");
-            var floats = new float[16];
-            Helper.MatrixToFloats(camera.CalculateViewProjectionMatrix(), floats);
-            GL.ProgramUniformMatrix4(Program.Resources.SolidBlockGS.ProgramID, viewProjLocation, 1, true, floats);
         }
 
         public void Dispose() {
             _vao?.Dispose();
         }
 
+        public void Update(float delta, KeyboardState keyboard, MouseState mouse) {
+            if (keyboard[Key.W]) _camera.Position.Z -= _cameraMovementSpeed * delta;
+            if (keyboard[Key.A]) _camera.Position.X -= _cameraMovementSpeed * delta;
+            if (keyboard[Key.S]) _camera.Position.Z += _cameraMovementSpeed * delta;
+            if (keyboard[Key.D]) _camera.Position.X += _cameraMovementSpeed * delta;
+
+            if (_lastMouseX != -1 && _lastMouseY != -1) {
+                var deltaX = (float) (mouse.X - _lastMouseX);
+                var deltaY = (float) (mouse.Y - _lastMouseY);
+                _camera.Direction.X += deltaY * delta * _cameraRotationSpeed;
+                _camera.Direction.Y += deltaX * delta * _cameraRotationSpeed;
+                //_camera.Direction.X = MathF.Min(MathF.Max(_camera.Direction.X, -0.99f), 0.99f);
+            }
+            _lastMouseX = mouse.X;
+            _lastMouseY = mouse.Y;
+        }
+
         public void Render() {
+            Console.WriteLine(_camera.Position);
+            var viewProjLocation = GL.GetUniformLocation(Program.Resources.SolidBlockGS.ProgramID, "u_viewProj");
+            var floats = new float[16];
+            Helper.MatrixToFloats(_camera.CalculateViewProjectionMatrix(), floats);
+            GL.ProgramUniformMatrix4(Program.Resources.SolidBlockGS.ProgramID, viewProjLocation, 1, true, floats);
+
             GL.BindProgramPipeline(_ppo);
             GL.BindVertexArray(_vao.Vao);
             GL.DrawArrays(PrimitiveType.Points, 0, Voxel.BlockCount);

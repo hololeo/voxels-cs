@@ -50,6 +50,10 @@ namespace Voxels {
 
                 GL.Clear(ClearBufferMask.ColorBufferBit);
 
+                var keyboard = Keyboard.GetState();
+                var mouse = Mouse.GetState();
+
+                _world.Update(delta, keyboard, mouse);
                 _world.Render();
 
                 _window.SwapBuffers();
