@@ -17,13 +17,14 @@ namespace Voxels {
         private int _ppo;
         private Camera _camera = new Camera {
             Position = Vector3.Zero,
-            Direction = Vector3.Zero,
+            Front = Vector3.UnitZ,
             Fov = 90f,
             AspectRatio = Program.AspectRatio
         };
         private const float _cameraMovementSpeed = 5f, _cameraRotationSpeed = 0.2f;
-        private int _lastMouseX, _lastMouseY;
+        private int _lastMouseX = int.MaxValue, _lastMouseY;
         private bool _forward, _backward, _left, _right;
+        private Vector2 _camDir = Vector2.Zero;
 
         public World() {
             var window = Program.Window;
@@ -80,16 +81,28 @@ namespace Voxels {
 
         public void Update(float delta) {
             var mouse = Mouse.GetState();
-            _camera.Direction.Y += (mouse.X - _lastMouseX) * delta * _cameraRotationSpeed;
-            _camera.Direction.X += (mouse.Y - _lastMouseY) * delta * _cameraRotationSpeed;
+            if (_lastMouseX == int.MaxValue) {
+                _lastMouseX = mouse.X;
+                _lastMouseY = mouse.Y;
+                return;
+            }
+            _camDir.X += (mouse.X - _lastMouseX) * delta * _cameraRotationSpeed;
+            _camDir.Y -= (mouse.Y - _lastMouseY) * delta * _cameraRotationSpeed;
             _lastMouseX = mouse.X;
             _lastMouseY = mouse.Y;
-            _camera.Direction.X = MathF.Max(MathF.Min(_camera.Direction.X, 1.57f), -1.57f);
+            _camDir.Y = MathF.Max(MathF.Min(_camDir.Y, 1.57f), -1.57f);
 
-            if (_forward) _camera.Position.Z -= _cameraMovementSpeed * delta;
-            if (_left) _camera.Position.X -= _cameraMovementSpeed * delta;
-            if (_backward) _camera.Position.Z += _cameraMovementSpeed * delta;
-            if (_right) _camera.Position.X += _cameraMovementSpeed * delta;
+            var front = Vector3.Normalize(new Vector3 {
+                X = MathF.Cos(_camDir.Y) * MathF.Cos(_camDir.X),
+                Y = MathF.Sin(_camDir.Y),
+                Z = MathF.Cos(_camDir.Y) * MathF.Sin(_camDir.X)
+            });
+            var right = Vector3.Normalize(Vector3.Cross(front, Vector3.UnitY));
+            if (_forward) _camera.Position += front * delta * _cameraMovementSpeed;
+            if (_backward) _camera.Position -= front * delta * _cameraMovementSpeed;
+            if (_left) _camera.Position -= right * delta * _cameraMovementSpeed;
+            if (_right) _camera.Position += right * delta * _cameraMovementSpeed;
+            _camera.Front = front;
         }
 
         public void Render() {
