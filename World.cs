@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using OpenTK;
 using OpenTK.Graphics.OpenGL4;
 
@@ -14,7 +15,11 @@ namespace Voxels {
         private Dictionary<(int, int, int), Voxel> _voxels = new Dictionary<(int, int, int), Voxel>();
         private VertexArray _vao;
         private int _ppo;
-        private Camera camera = new Camera();
+        private Camera camera = new Camera {
+            Position = new Vector3(-10, 10, -10),
+            Fov = 90f,
+            AspectRatio = Program.AspectRatio
+        };
 
         public World() {
             _vao = VertexArray.Create(() => {
@@ -35,8 +40,16 @@ namespace Voxels {
             GL.UseProgramStages(_ppo, ProgramStageMask.FragmentShaderBit, Program.Resources.VoxelFS.ProgramID);
             GL.UseProgramStages(_ppo, ProgramStageMask.GeometryShaderBit, Program.Resources.SolidBlockGS.ProgramID);
 
-            var color = GL.GetUniformLocation(Program.Resources.VoxelFS.ProgramID, "u_color");
-            GL.ProgramUniform3(Program.Resources.VoxelFS.ProgramID, color, 0.2f, 0.5f, 1.0f);
+            var colorLocation = GL.GetUniformLocation(Program.Resources.VoxelFS.ProgramID, "u_color");
+            GL.ProgramUniform3(Program.Resources.VoxelFS.ProgramID, colorLocation, 0.2f, 0.5f, 1.0f);
+
+            var viewLocation = GL.GetUniformLocation(Program.Resources.VoxelVS.ProgramID, "u_view");
+            var projectionLocation = GL.GetUniformLocation(Program.Resources.VoxelVS.ProgramID, "u_proj");
+            var floats = new float[16];
+            Helper.MatrixToFloats(camera.View, floats);
+            GL.ProgramUniformMatrix4(Program.Resources.VoxelVS.ProgramID, viewLocation, 1, false, floats);
+            Helper.MatrixToFloats(camera.Projection, floats);
+            GL.ProgramUniformMatrix4(Program.Resources.VoxelVS.ProgramID, projectionLocation, 1, false, floats);
         }
 
         public void Dispose() {

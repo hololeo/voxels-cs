@@ -7,7 +7,8 @@ using OpenTK.Input;
 
 namespace Voxels {
     public class Program : IDisposable {
-        public static readonly Resources Resources = new Resources();
+        public static Resources Resources { get; private set; } = new Resources();
+        public static float AspectRatio { get; private set; }
 
         private GameWindow _window;
         private World _world;
@@ -20,6 +21,7 @@ namespace Voxels {
             _window.MakeCurrent();
 
             Resources.Load();
+            AspectRatio = 800f / 450f;
 
             _world = new World();
             _world.GenerateChunk(1, 1, 1);
