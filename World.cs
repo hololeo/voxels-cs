@@ -17,19 +17,18 @@ namespace Voxels {
         private int _ppo;
         private Camera _camera = new Camera {
             Position = Vector3.Zero,
-            Direction = -Vector3.One,
+            Direction = Vector3.Zero,
             Fov = 90f,
             AspectRatio = Program.AspectRatio
         };
-        private const float _cameraMovementSpeed = 8f, _cameraRotationSpeed = 1f;
-        private int _mouseDX, _mouseDY;
+        private const float _cameraMovementSpeed = 5f, _cameraRotationSpeed = 0.2f;
+        private int _lastMouseX, _lastMouseY;
         private bool _forward, _backward, _left, _right;
 
         public World() {
             var window = Program.Window;
             window.KeyDown += OnKeyDown;
             window.KeyUp += OnKeyUp;
-            window.MouseMove += OnMouseMove;
 
             _vao = VertexArray.Create(() => {
                 var vertices = new VoxelVertex[Voxel.BlockCount];
@@ -59,10 +58,9 @@ namespace Voxels {
             var window = Program.Window;
             window.KeyDown -= OnKeyDown;
             window.KeyUp -= OnKeyUp;
-            window.MouseMove -= OnMouseMove;
         }
 
-        private void OnKeyUp(object sender, KeyboardKeyEventArgs args) {
+        private void OnKeyDown(object sender, KeyboardKeyEventArgs args) {
             switch (args.Key) {
                 case Key.A: _left = true; break;
                 case Key.D: _right = true; break;
@@ -71,7 +69,7 @@ namespace Voxels {
             }
         }
 
-        private void OnKeyDown(object sender, KeyboardKeyEventArgs args) {
+        private void OnKeyUp(object sender, KeyboardKeyEventArgs args) {
             switch (args.Key) {
                 case Key.A: _left = false; break;
                 case Key.D: _right = false; break;
@@ -80,15 +78,13 @@ namespace Voxels {
             }
         }
 
-        private void OnMouseMove(object sender, MouseMoveEventArgs args) {
-            _mouseDX = args.XDelta;
-            _mouseDY = args.YDelta;
-        }
-
         public void Update(float delta) {
-            _camera.Direction.X += _mouseDX * delta * _cameraRotationSpeed;
-            _camera.Direction.Y += _mouseDY * delta * _cameraRotationSpeed;
-            _mouseDX = _mouseDY = 0;
+            var mouse = Mouse.GetState();
+            _camera.Direction.Y += (mouse.X - _lastMouseX) * delta * _cameraRotationSpeed;
+            _camera.Direction.X += (mouse.Y - _lastMouseY) * delta * _cameraRotationSpeed;
+            _lastMouseX = mouse.X;
+            _lastMouseY = mouse.Y;
+            _camera.Direction.X = MathF.Max(MathF.Min(_camera.Direction.X, 1.57f), -1.57f);
 
             if (_forward) _camera.Position.Z -= _cameraMovementSpeed * delta;
             if (_left) _camera.Position.X -= _cameraMovementSpeed * delta;
