@@ -14,6 +14,7 @@ namespace Voxels {
         private Dictionary<(int, int, int), Voxel> _voxels = new Dictionary<(int, int, int), Voxel>();
         private VertexArray _vao;
         private int _ppo;
+        private Camera camera = new Camera();
 
         public World() {
             _vao = VertexArray.Create(() => {
