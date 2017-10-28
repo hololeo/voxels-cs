@@ -9,12 +9,12 @@ namespace Voxels {
         private int _vao;
         private IEnumerable<ArrayBuffer> _buffers;
 
-        public VertexArray Create(Func<IEnumerable<ArrayBuffer>> bufferCreationCallback) {
-            _vao = GL.GenVertexArray();
-            GL.BindVertexArray(_vao);
-            _buffers = bufferCreationCallback();
+        public static VertexArray Create(Func<IEnumerable<ArrayBuffer>> bufferCreationCallback) {
+            var va = new VertexArray {_vao = GL.GenVertexArray()};
+            GL.BindVertexArray(va._vao);
+            va._buffers = bufferCreationCallback();
             GL.BindVertexArray(0);
-            return this;
+            return va;
         }
 
         public void Dispose() {

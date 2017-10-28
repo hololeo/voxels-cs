@@ -11,25 +11,25 @@ namespace Voxels {
 
         private int _vbo;
 
-        public ArrayBuffer CreateAsUnique<T>(T[] data, int components, VertexAttribPointerType type, BufferUsageHint usage)
+        public static ArrayBuffer CreateAsUnique<T>(T[] data, int components, VertexAttribPointerType type, BufferUsageHint usage)
             where T : struct {
             var typeSize = Marshal.SizeOf<T>();
             var bufferSize = typeSize * data.Length;
-            _vbo = GL.GenBuffer();
-            GL.BindBuffer(BufferTarget.ArrayBuffer, _vbo);
+            var buffer = new ArrayBuffer {_vbo = GL.GenBuffer()};
+            GL.BindBuffer(BufferTarget.ArrayBuffer, buffer._vbo);
             GL.BufferData(BufferTarget.ArrayBuffer, bufferSize, data, usage);
             GL.EnableVertexAttribArray(0);
             GL.VertexAttribPointer(0, components, type, false, typeSize * components, IntPtr.Zero);
             GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
-            return this;
+            return buffer;
         }
 
-        public ArrayBuffer CreateAsVertices<T>(T[] vertices, BufferUsageHint usage)
+        public static ArrayBuffer CreateAsVertices<T>(T[] vertices, BufferUsageHint usage)
             where T : struct {
             var typeSize = Marshal.SizeOf<T>();
             var bufferSize = typeSize * vertices.Length;
-            _vbo = GL.GenBuffer();
-            GL.BindBuffer(BufferTarget.ArrayBuffer, _vbo);
+            var buffer = new ArrayBuffer {_vbo = GL.GenBuffer()};
+            GL.BindBuffer(BufferTarget.ArrayBuffer, buffer._vbo);
             GL.BufferData(BufferTarget.ArrayBuffer, bufferSize, vertices, usage);
             foreach (var field in typeof(T).GetFields()) {
                 var attrib = field.GetCustomAttribute<VertexAttribAttribute>();
@@ -39,7 +39,7 @@ namespace Voxels {
                     attrib.ComponentSize * attrib.Count, new IntPtr(attrib.Offset));
             }
             GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
-            return this;
+            return buffer;
         }
 
         public void Dispose() {

@@ -6,19 +6,13 @@ using OpenTK.Graphics.OpenGL4;
 using OpenTK.Input;
 
 namespace Voxels {
-    public struct Vertex {
-        [VertexAttrib(0, 2, typeof(float))] public Vector2 Position;
-    }
-
     public class Program : IDisposable {
         public static readonly Resources Resources = new Resources();
 
         private GameWindow _window;
-        private VertexArray _vao = new VertexArray();
-        private World _world = new World();
-        private int _ppo;
+        private World _world;
 
-        private void Init() {
+        private Program() {
             _window = new GameWindow(800, 450, GraphicsMode.Default, "Voxels", GameWindowFlags.FixedWindow,
                 DisplayDevice.Default, 4, 6, GraphicsContextFlags.ForwardCompatible) {
                 VSync = VSyncMode.Adaptive, Visible = true
@@ -27,30 +21,12 @@ namespace Voxels {
 
             Resources.Load();
 
-            var positions = new[] {
-                new Vertex { Position = new Vector2(-0.5f, -0.5f) },
-                new Vertex { Position = new Vector2(0f, 0.5f) },
-                new Vertex { Position = new Vector2(0.5f, -0.5f) }
-            };
-
-            _vao.Create(() => new[] {
-                 new ArrayBuffer().CreateAsVertices(positions, BufferUsageHint.StaticDraw)
-            });
-
-            _ppo = GL.GenProgramPipeline();
-            GL.UseProgramStages(_ppo, ProgramStageMask.VertexShaderBit, Resources.VoxelVS.ProgramID);
-            GL.UseProgramStages(_ppo, ProgramStageMask.FragmentShaderBit, Resources.VoxelFS.ProgramID);
-            GL.UseProgramStages(_ppo, ProgramStageMask.GeometryShaderBit, Resources.SolidBlockGS.ProgramID);
-
-            var color = GL.GetUniformLocation(Resources.VoxelFS.ProgramID, "u_color");
-            GL.ProgramUniform3(Resources.VoxelFS.ProgramID, color, 0.2f, 0.5f, 1.0f);
-
+            _world = new World();
             _world.GenerateChunk(1, 1, 1);
         }
 
         public void Dispose() {
-            if (GL.IsProgramPipeline(_ppo)) GL.DeleteProgramPipeline(_ppo);
-            _vao?.Dispose();
+            _world?.Dispose();
             Resources?.Dispose();
         }
 
@@ -72,11 +48,7 @@ namespace Voxels {
 
                 GL.Clear(ClearBufferMask.ColorBufferBit);
 
-                GL.BindProgramPipeline(_ppo);
-                GL.BindVertexArray(_vao.Vao);
-                GL.DrawArrays(PrimitiveType.Points, 0, 3);
-                GL.BindVertexArray(0);
-                GL.BindProgramPipeline(0);
+                _world.Render();
 
                 _window.SwapBuffers();
                 _window.ProcessEvents();
@@ -91,7 +63,6 @@ namespace Voxels {
 
         public static void Main(string[] args) {
             using (var program = new Program()) {
-                program.Init();
                 program.Run();
             }
         }
