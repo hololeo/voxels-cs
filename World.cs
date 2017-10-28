@@ -16,15 +16,21 @@ namespace Voxels {
         private VertexArray _vao;
         private int _ppo;
         private Camera _camera = new Camera {
-            Position = new Vector3(0f, 0f, -10f),
-            Direction = Vector3.Zero,
+            Position = Vector3.Zero,
+            Direction = -Vector3.One,
             Fov = 90f,
             AspectRatio = Program.AspectRatio
         };
-        private const float _cameraMovementSpeed = 8f, _cameraRotationSpeed = 8f;
-        private int _lastMouseX = -1, _lastMouseY = -1;
+        private const float _cameraMovementSpeed = 8f, _cameraRotationSpeed = 1f;
+        private int _mouseDX, _mouseDY;
+        private bool _forward, _backward, _left, _right;
 
         public World() {
+            var window = Program.Window;
+            window.KeyDown += OnKeyDown;
+            window.KeyUp += OnKeyUp;
+            window.MouseMove += OnMouseMove;
+
             _vao = VertexArray.Create(() => {
                 var vertices = new VoxelVertex[Voxel.BlockCount];
                 foreach (var x in Enumerable.Range(0, Voxel.Size))
@@ -49,32 +55,54 @@ namespace Voxels {
 
         public void Dispose() {
             _vao?.Dispose();
+
+            var window = Program.Window;
+            window.KeyDown -= OnKeyDown;
+            window.KeyUp -= OnKeyUp;
+            window.MouseMove -= OnMouseMove;
         }
 
-        public void Update(float delta, KeyboardState keyboard, MouseState mouse) {
-            if (keyboard[Key.W]) _camera.Position.Z -= _cameraMovementSpeed * delta;
-            if (keyboard[Key.A]) _camera.Position.X -= _cameraMovementSpeed * delta;
-            if (keyboard[Key.S]) _camera.Position.Z += _cameraMovementSpeed * delta;
-            if (keyboard[Key.D]) _camera.Position.X += _cameraMovementSpeed * delta;
-
-            if (_lastMouseX != -1 && _lastMouseY != -1) {
-                var deltaX = (float) (mouse.X - _lastMouseX);
-                var deltaY = (float) (mouse.Y - _lastMouseY);
-                _camera.Direction.X += deltaY * delta * _cameraRotationSpeed;
-                _camera.Direction.Y += deltaX * delta * _cameraRotationSpeed;
-                //_camera.Direction.X = MathF.Min(MathF.Max(_camera.Direction.X, -0.99f), 0.99f);
+        private void OnKeyUp(object sender, KeyboardKeyEventArgs args) {
+            switch (args.Key) {
+                case Key.A: _left = true; break;
+                case Key.D: _right = true; break;
+                case Key.W: _forward = true; break;
+                case Key.S: _backward = true; break;
             }
-            _lastMouseX = mouse.X;
-            _lastMouseY = mouse.Y;
+        }
+
+        private void OnKeyDown(object sender, KeyboardKeyEventArgs args) {
+            switch (args.Key) {
+                case Key.A: _left = false; break;
+                case Key.D: _right = false; break;
+                case Key.W: _forward = false; break;
+                case Key.S: _backward = false; break;
+            }
+        }
+
+        private void OnMouseMove(object sender, MouseMoveEventArgs args) {
+            _mouseDX = args.XDelta;
+            _mouseDY = args.YDelta;
+        }
+
+        public void Update(float delta) {
+            _camera.Direction.X += _mouseDX * delta * _cameraRotationSpeed;
+            _camera.Direction.Y += _mouseDY * delta * _cameraRotationSpeed;
+            _mouseDX = _mouseDY = 0;
+
+            if (_forward) _camera.Position.Z -= _cameraMovementSpeed * delta;
+            if (_left) _camera.Position.X -= _cameraMovementSpeed * delta;
+            if (_backward) _camera.Position.Z += _cameraMovementSpeed * delta;
+            if (_right) _camera.Position.X += _cameraMovementSpeed * delta;
         }
 
         public void Render() {
-            Console.WriteLine(_camera.Position);
             var viewProjLocation = GL.GetUniformLocation(Program.Resources.SolidBlockGS.ProgramID, "u_viewProj");
             var floats = new float[16];
             Helper.MatrixToFloats(_camera.CalculateViewProjectionMatrix(), floats);
             GL.ProgramUniformMatrix4(Program.Resources.SolidBlockGS.ProgramID, viewProjLocation, 1, true, floats);
 
+            GL.CullFace(CullFaceMode.FrontAndBack);
             GL.BindProgramPipeline(_ppo);
             GL.BindVertexArray(_vao.Vao);
             GL.DrawArrays(PrimitiveType.Points, 0, Voxel.BlockCount);

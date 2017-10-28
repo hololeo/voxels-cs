@@ -7,13 +7,16 @@ using OpenTK.Input;
 
 namespace Voxels {
     public class Program : IDisposable {
-        public static Resources Resources { get; private set; } = new Resources();
+        public static Program Instance { get; private set; }
+        public static Resources Resources { get; } = new Resources();
         public static float AspectRatio { get; private set; }
+        public static GameWindow Window => Instance._window;
 
         private GameWindow _window;
         private World _world;
 
         private Program() {
+            Instance = this;
             _window = new GameWindow(800, 450, GraphicsMode.Default, "Voxels", GameWindowFlags.FixedWindow,
                 DisplayDevice.Default, 4, 6, GraphicsContextFlags.ForwardCompatible) {
                 VSync = VSyncMode.Adaptive, Visible = true
@@ -50,10 +53,7 @@ namespace Voxels {
 
                 GL.Clear(ClearBufferMask.ColorBufferBit);
 
-                var keyboard = Keyboard.GetState();
-                var mouse = Mouse.GetState();
-
-                _world.Update(delta, keyboard, mouse);
+                _world.Update(delta);
                 _world.Render();
 
                 _window.SwapBuffers();
