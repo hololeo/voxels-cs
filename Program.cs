@@ -21,6 +21,11 @@ namespace Voxels {
                 DisplayDevice.Default, 4, 6, GraphicsContextFlags.ForwardCompatible) {
                 VSync = VSyncMode.Adaptive, Visible = true
             };
+            _window.CursorVisible = false;
+            _window.KeyDown += (sender, args) => {
+                if (args.Key != Key.Escape) return;
+                _window.CursorVisible = !_window.CursorVisible;
+            };
             _window.MakeCurrent();
 
             Resources.Load();
