@@ -8,6 +8,7 @@ using OpenTK.Input;
 namespace Voxels {
     public struct VoxelVertex {
         [VertexAttrib(0, 3, typeof(float))] public Vector3 Position;
+        [VertexAttrib(1, 1, typeof(uint), Offset = 12)] public uint BlockType;
     }
 
     public class World : IDisposable {
@@ -32,12 +33,14 @@ namespace Voxels {
             window.KeyUp += OnKeyUp;
 
             _vao = VertexArray.Create(() => {
+                //var random = new Random();
                 var vertices = new VoxelVertex[Voxel.BlockCount];
                 foreach (var x in Enumerable.Range(0, Voxel.Size))
                 foreach (var y in Enumerable.Range(0, Voxel.Size))
                 foreach (var z in Enumerable.Range(0, Voxel.Size))
                     vertices[z * Voxel.Size * Voxel.Size + y * Voxel.Size + x] = new VoxelVertex {
-                        Position = new Vector3(x, y, z)
+                        Position = new Vector3(x, y, z),
+                        BlockType = 0 //(uint) (random.NextDouble() > 0.9 ? 1 : 0)
                     };
                 return new[] {
                     ArrayBuffer.CreateAsVertices(vertices, BufferUsageHint.StaticDraw)
@@ -113,7 +116,7 @@ namespace Voxels {
             Helper.MatrixToFloats(_camera.CalculateViewProjectionMatrix(), floats);
             GL.ProgramUniformMatrix4(Program.Resources.SolidBlockGS.ProgramID, viewProjLocation, 1, true, floats);
 
-            GL.CullFace(CullFaceMode.FrontAndBack);
+            GL.CullFace(CullFaceMode.Back);
             GL.BindProgramPipeline(_ppo);
             GL.BindVertexArray(_vao.Vao);
             GL.DrawArrays(PrimitiveType.Points, 0, Voxel.BlockCount);

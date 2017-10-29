@@ -1,5 +1,8 @@
 #version 460 core
 
+#define SIZE 0.499999
+#define BLOCK_TYPE 1
+
 layout (points) in;
 layout (triangle_strip, max_vertices = 24) out;
 
@@ -15,80 +18,82 @@ out gl_PerVertex {
     vec4 gl_Position;
 };
 
+in uint vtg_btype[];
+
 out vec3 gtf_color;
 
 void main() {
-    float size = 4.99f;
-
+    if (vtg_btype[0] != BLOCK_TYPE) return;
+    
     // Left.
     gtf_color = u_primaryColor;
-    gl_Position = (gl_in[0].gl_Position + vec4(-size, -size, -size, 0.0)) * u_viewProj;
+    gl_Position = (gl_in[0].gl_Position + vec4(-SIZE, -SIZE, -SIZE, 0.0)) * u_viewProj;
     EmitVertex();
-    gl_Position = (gl_in[0].gl_Position + vec4(size, -size, -size, 0.0)) * u_viewProj;
+    gl_Position = (gl_in[0].gl_Position + vec4(SIZE, -SIZE, -SIZE, 0.0)) * u_viewProj;
     EmitVertex();
-    gl_Position = (gl_in[0].gl_Position + vec4(-size, size, -size, 0.0)) * u_viewProj;
+    gl_Position = (gl_in[0].gl_Position + vec4(-SIZE, SIZE, -SIZE, 0.0)) * u_viewProj;
     EmitVertex();
-    gl_Position = (gl_in[0].gl_Position + vec4(size, size, -size, 0.0)) * u_viewProj;
+    gl_Position = (gl_in[0].gl_Position + vec4(SIZE, SIZE, -SIZE, 0.0)) * u_viewProj;
     EmitVertex();
     EndPrimitive();
 
     // Right.
     gtf_color = u_secondaryColor;
-    gl_Position = (gl_in[0].gl_Position + vec4(-size, -size, size, 0.0)) * u_viewProj;
+    gl_Position = (gl_in[0].gl_Position + vec4(-SIZE, -SIZE, SIZE, 0.0)) * u_viewProj;
     EmitVertex();
-    gl_Position = (gl_in[0].gl_Position + vec4(size, -size, size, 0.0)) * u_viewProj;
+    gl_Position = (gl_in[0].gl_Position + vec4(SIZE, -SIZE, SIZE, 0.0)) * u_viewProj;
     EmitVertex();
-    gl_Position = (gl_in[0].gl_Position + vec4(-size, size, size, 0.0)) * u_viewProj;
+    gl_Position = (gl_in[0].gl_Position + vec4(-SIZE, SIZE, SIZE, 0.0)) * u_viewProj;
     EmitVertex();
-    gl_Position = (gl_in[0].gl_Position + vec4(size, size, size, 0.0)) * u_viewProj;
+    gl_Position = (gl_in[0].gl_Position + vec4(SIZE, SIZE, SIZE, 0.0)) * u_viewProj;
     EmitVertex();
     EndPrimitive();
 
     // Front.
     gtf_color = u_primaryColor;
-    gl_Position = (gl_in[0].gl_Position + vec4(size, -size, -size, 0.0)) * u_viewProj;
+    gl_Position = (gl_in[0].gl_Position + vec4(SIZE, -SIZE, -SIZE, 0.0)) * u_viewProj;
     EmitVertex();
-    gl_Position = (gl_in[0].gl_Position + vec4(size, size, -size, 0.0)) * u_viewProj;
+    gl_Position = (gl_in[0].gl_Position + vec4(SIZE, SIZE, -SIZE, 0.0)) * u_viewProj;
     EmitVertex();
-    gl_Position = (gl_in[0].gl_Position + vec4(size, -size, size, 0.0)) * u_viewProj;
+    gl_Position = (gl_in[0].gl_Position + vec4(SIZE, -SIZE, SIZE, 0.0)) * u_viewProj;
     EmitVertex();
-    gl_Position = (gl_in[0].gl_Position + vec4(size, size, size, 0.0)) * u_viewProj;
+    gl_Position = (gl_in[0].gl_Position + vec4(SIZE, SIZE, SIZE, 0.0)) * u_viewProj;
     EmitVertex();
     EndPrimitive();
 
     // Back.
     gtf_color = u_secondaryColor;
-    gl_Position = (gl_in[0].gl_Position + vec4(-size, -size, -size, 0.0)) * u_viewProj;
+    gl_Position = (gl_in[0].gl_Position + vec4(-SIZE, -SIZE, -SIZE, 0.0)) * u_viewProj;
     EmitVertex();
-    gl_Position = (gl_in[0].gl_Position + vec4(-size, size, -size, 0.0)) * u_viewProj;
+    gl_Position = (gl_in[0].gl_Position + vec4(-SIZE, SIZE, -SIZE, 0.0)) * u_viewProj;
     EmitVertex();
-    gl_Position = (gl_in[0].gl_Position + vec4(-size, -size, size, 0.0)) * u_viewProj;
+    gl_Position = (gl_in[0].gl_Position + vec4(-SIZE, -SIZE, SIZE, 0.0)) * u_viewProj;
     EmitVertex();
-    gl_Position = (gl_in[0].gl_Position + vec4(-size, size, size, 0.0)) * u_viewProj;
+    gl_Position = (gl_in[0].gl_Position + vec4(-SIZE, SIZE, SIZE, 0.0)) * u_viewProj;
     EmitVertex();
     EndPrimitive();
 
     // Top.
     gtf_color = u_primaryColor;
-    gl_Position = (gl_in[0].gl_Position + vec4(-size, size, -size, 0.0)) * u_viewProj;
+    gl_Position = (gl_in[0].gl_Position + vec4(-SIZE, SIZE, -SIZE, 0.0)) * u_viewProj;
     EmitVertex();
-    gl_Position = (gl_in[0].gl_Position + vec4(size, size, -size, 0.0)) * u_viewProj;
+    gl_Position = (gl_in[0].gl_Position + vec4(SIZE, SIZE, -SIZE, 0.0)) * u_viewProj;
     EmitVertex();
-    gl_Position = (gl_in[0].gl_Position + vec4(-size, size, size, 0.0)) * u_viewProj;
+    gl_Position = (gl_in[0].gl_Position + vec4(-SIZE, SIZE, SIZE, 0.0)) * u_viewProj;
     EmitVertex();
-    gl_Position = (gl_in[0].gl_Position + vec4(size, size, size, 0.0)) * u_viewProj;
+    gl_Position = (gl_in[0].gl_Position + vec4(SIZE, SIZE, SIZE, 0.0)) * u_viewProj;
     EmitVertex();
     EndPrimitive();
 
     // Bottom.
     gtf_color = u_secondaryColor;
-    gl_Position = (gl_in[0].gl_Position + vec4(-size, -size, -size, 0.0)) * u_viewProj;
+    gl_Position = (gl_in[0].gl_Position + vec4(-SIZE, -SIZE, -SIZE, 0.0)) * u_viewProj;
     EmitVertex();
-    gl_Position = (gl_in[0].gl_Position + vec4(size, -size, -size, 0.0)) * u_viewProj;
+    gl_Position = (gl_in[0].gl_Position + vec4(SIZE, -SIZE, -SIZE, 0.0)) * u_viewProj;
     EmitVertex();
-    gl_Position = (gl_in[0].gl_Position + vec4(-size, -size, size, 0.0)) * u_viewProj;
+    gl_Position = (gl_in[0].gl_Position + vec4(-SIZE, -SIZE, SIZE, 0.0)) * u_viewProj;
     EmitVertex();
-    gl_Position = (gl_in[0].gl_Position + vec4(size, -size, size, 0.0)) * u_viewProj;
+    gl_Position = (gl_in[0].gl_Position + vec4(SIZE, -SIZE, SIZE, 0.0)) * u_viewProj;
     EmitVertex();
     EndPrimitive();
 }

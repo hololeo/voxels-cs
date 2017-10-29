@@ -15,14 +15,14 @@ namespace Voxels {
         public VertexAttribAttribute(int index, int count, Type type) {
             Index = index;
             Count = count;
-
             ComponentSize = Marshal.SizeOf(type);
-            ComponentType = Lookup[type];
+            ComponentType = _lookup[type];
         }
 
-        private static readonly IDictionary<Type, VertexAttribPointerType> Lookup
+        private static readonly IDictionary<Type, VertexAttribPointerType> _lookup
             = new Dictionary<Type, VertexAttribPointerType> {
-            [typeof(float)] = VertexAttribPointerType.Float
+            [typeof(float)] = VertexAttribPointerType.Float,
+            [typeof(uint)] = VertexAttribPointerType.UnsignedInt
         };
     }
 }

@@ -35,8 +35,8 @@ namespace Voxels {
                 var attrib = field.GetCustomAttribute<VertexAttribAttribute>();
                 if (attrib == null) continue;
                 GL.EnableVertexAttribArray(attrib.Index);
-                GL.VertexAttribPointer(attrib.Index, attrib.Count, attrib.ComponentType, false,
-                    attrib.ComponentSize * attrib.Count, new IntPtr(attrib.Offset));
+                GL.VertexAttribPointer(attrib.Index, attrib.Count, attrib.ComponentType, false, typeSize,
+                    new IntPtr(attrib.Offset));
             }
             GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
             return buffer;
