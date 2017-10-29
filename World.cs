@@ -33,14 +33,14 @@ namespace Voxels {
             window.KeyUp += OnKeyUp;
 
             _vao = VertexArray.Create(() => {
-                //var random = new Random();
+                var random = new Random();
                 var vertices = new VoxelVertex[Voxel.BlockCount];
                 foreach (var x in Enumerable.Range(0, Voxel.Size))
                 foreach (var y in Enumerable.Range(0, Voxel.Size))
                 foreach (var z in Enumerable.Range(0, Voxel.Size))
                     vertices[z * Voxel.Size * Voxel.Size + y * Voxel.Size + x] = new VoxelVertex {
                         Position = new Vector3(x, y, z),
-                        BlockType = 0 //(uint) (random.NextDouble() > 0.9 ? 1 : 0)
+                        BlockType = (uint) (random.NextDouble() > 0.9 ? 1 : 0)
                     };
                 return new[] {
                     ArrayBuffer.CreateAsVertices(vertices, BufferUsageHint.StaticDraw)

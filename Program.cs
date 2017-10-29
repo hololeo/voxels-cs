@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL4;
@@ -18,15 +19,18 @@ namespace Voxels {
         private Program() {
             Instance = this;
             _window = new GameWindow(800, 450, GraphicsMode.Default, "Voxels", GameWindowFlags.FixedWindow,
-                DisplayDevice.Default, 4, 6, GraphicsContextFlags.ForwardCompatible) {
+                DisplayDevice.Default, 4, 6, GraphicsContextFlags.ForwardCompatible | GraphicsContextFlags.Debug) {
                 VSync = VSyncMode.Adaptive, Visible = true
             };
+            _window.MakeCurrent();
+
+            ConfigureGLDebug();
+
             _window.CursorVisible = false;
             _window.KeyDown += (sender, args) => {
                 if (args.Key != Key.Escape) return;
                 _window.CursorVisible = !_window.CursorVisible;
             };
-            _window.MakeCurrent();
 
             Resources.Load();
             AspectRatio = 800f / 450f;
@@ -72,7 +76,20 @@ namespace Voxels {
             }
         }
 
+        private static void ConfigureGLDebug() {
+            var flags = (ContextFlagMask) GL.GetInteger(GetPName.ContextFlags);
+            if ((flags & ContextFlagMask.ContextFlagDebugBit) != ContextFlagMask.ContextFlagDebugBit) return;
+            GL.Enable(EnableCap.DebugOutput);
+            GL.Enable(EnableCap.DebugOutputSynchronous);
+            GL.DebugMessageControl(DebugSourceControl.DontCare, DebugTypeControl.DontCare,
+                DebugSeverityControl.DontCare, 0, new int[0], true);
+            GL.DebugMessageCallback((source, type, id, severity, length, message, param) => {
+                Console.WriteLine($"(Debug) {type}, {id}, {severity}: {Marshal.PtrToStringAnsi(message)}");
+            }, IntPtr.Zero);
+        }
+
         public static void Main(string[] args) {
+            Debug.WriteLine(Process.GetCurrentProcess().Id);
             using (var program = new Program()) {
                 program.Run();
             }
