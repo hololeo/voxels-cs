@@ -24,6 +24,7 @@ namespace Voxels {
             };
             _window.MakeCurrent();
 
+            GL.CullFace(CullFaceMode.Back);
             ConfigureGLDebug();
 
             _window.CursorVisible = false;

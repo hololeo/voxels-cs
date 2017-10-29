@@ -50,12 +50,6 @@ namespace Voxels {
             _ppo = GL.GenProgramPipeline();
             GL.UseProgramStages(_ppo, ProgramStageMask.VertexShaderBit, Program.Resources.VoxelVS.ProgramID);
             GL.UseProgramStages(_ppo, ProgramStageMask.FragmentShaderBit, Program.Resources.VoxelFS.ProgramID);
-            GL.UseProgramStages(_ppo, ProgramStageMask.GeometryShaderBit, Program.Resources.SolidBlockGS.ProgramID);
-
-            var colorLocation = GL.GetUniformLocation(Program.Resources.SolidBlockGS.ProgramID, "u_primaryColor");
-            GL.ProgramUniform3(Program.Resources.SolidBlockGS.ProgramID, colorLocation, 0.2f, 0.5f, 1.0f);
-            colorLocation = GL.GetUniformLocation(Program.Resources.SolidBlockGS.ProgramID, "u_secondaryColor");
-            GL.ProgramUniform3(Program.Resources.SolidBlockGS.ProgramID, colorLocation, 0.1f, 0.25f, 0.5f);
         }
 
         public void Dispose() {
@@ -111,15 +105,27 @@ namespace Voxels {
         }
 
         public void Render() {
-            var viewProjLocation = GL.GetUniformLocation(Program.Resources.SolidBlockGS.ProgramID, "u_viewProj");
             var floats = new float[16];
             Helper.MatrixToFloats(_camera.CalculateViewProjectionMatrix(), floats);
-            GL.ProgramUniformMatrix4(Program.Resources.SolidBlockGS.ProgramID, viewProjLocation, 1, true, floats);
 
-            GL.CullFace(CullFaceMode.Back);
             GL.BindProgramPipeline(_ppo);
             GL.BindVertexArray(_vao.Vao);
-            GL.DrawArrays(PrimitiveType.Points, 0, Voxel.BlockCount);
+            foreach (var (id, block) in Block.Blocks) {
+                var programID = block.GeometryShader?.ProgramID ?? 0;
+                if (programID == 0) continue;
+
+                GL.UseProgramStages(_ppo, ProgramStageMask.GeometryShaderBit, programID);
+
+                var viewProjLocation = GL.GetUniformLocation(programID, "u_viewProj");
+                GL.ProgramUniformMatrix4(programID, viewProjLocation, 1, true, floats);
+
+                var colorLocation = GL.GetUniformLocation(programID, "u_primaryColor");
+                GL.ProgramUniform3(programID, colorLocation, 0.2f, 0.5f, 1.0f);
+                colorLocation = GL.GetUniformLocation(programID, "u_secondaryColor");
+                GL.ProgramUniform3(programID, colorLocation, 0.1f, 0.25f, 0.5f);
+
+                GL.DrawArrays(PrimitiveType.Points, 0, Voxel.BlockCount);
+            }
             GL.BindVertexArray(0);
             GL.BindProgramPipeline(0);
         }

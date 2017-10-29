@@ -26,7 +26,7 @@ namespace Voxels {
 
         private static readonly IDictionary<Type, VertexAttribPointerType> _lookup
             = new Dictionary<Type, VertexAttribPointerType> {
-            [typeof(float)] = VertexAttribPointerType.Float,
+            [typeof(float)] = VertexAttribPointerType.Float
         };
 
         private static readonly IDictionary<Type, VertexAttribIntegerType> _ilookup
