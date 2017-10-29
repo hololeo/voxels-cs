@@ -123,9 +123,9 @@ namespace Voxels {
             GL.BindProgramPipeline(0);
         }
 
-        public void GenerateChunk(int x, int y, int z) {
+        public void GenerateChunk(int x, int y, int z, Random random = null) {
             if (_voxels.ContainsKey((x, y, z))) return;
-            _voxels[(x, y, z)] = new Voxel();
+            _voxels[(x, y, z)] = new Voxel(random ?? new Random());
         }
     }
 }

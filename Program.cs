@@ -35,12 +35,13 @@ namespace Voxels {
             Resources.Load();
             AspectRatio = 800f / 450f;
 
+            var random = new Random(123456);
             _world = new World();
-            _world.GenerateChunk(1, 1, 1);
-            _world.GenerateChunk(0, 0, 0);
-            _world.GenerateChunk(0, 2, 0);
-            _world.GenerateChunk(0, 0, 3);
-            _world.GenerateChunk(-7, 0, 0);
+            _world.GenerateChunk(1, 1, 1, random);
+            _world.GenerateChunk(0, 0, 0, random);
+            _world.GenerateChunk(0, 2, 0, random);
+            _world.GenerateChunk(0, 0, 3, random);
+            _world.GenerateChunk(-7, 0, 0, random);
         }
 
         public void Dispose() {

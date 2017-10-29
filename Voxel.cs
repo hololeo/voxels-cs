@@ -13,9 +13,8 @@ namespace Voxels {
 
         private VertexArray _vao;
 
-        public Voxel() {
+        public Voxel(Random random) {
             _vao = VertexArray.Create(() => {
-                var random = new Random();
                 var vertices = new VoxelVertex[Voxel.BlockCount];
                 foreach (var x in Enumerable.Range(0, Voxel.Size))
                 foreach (var y in Enumerable.Range(0, Voxel.Size))
