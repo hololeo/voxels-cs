@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices.ComTypes;
 using OpenTK;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Input;
@@ -14,7 +15,6 @@ namespace Voxels {
     public class World : IDisposable {
         public IReadOnlyDictionary<(int, int, int), Voxel> Voxels => _voxels;
         private Dictionary<(int, int, int), Voxel> _voxels = new Dictionary<(int, int, int), Voxel>();
-        private VertexArray _vao;
         private int _ppo;
         private Camera _camera = new Camera {
             Position = Vector3.Zero,
@@ -32,29 +32,13 @@ namespace Voxels {
             window.KeyDown += OnKeyDown;
             window.KeyUp += OnKeyUp;
 
-            _vao = VertexArray.Create(() => {
-                var random = new Random();
-                var vertices = new VoxelVertex[Voxel.BlockCount];
-                foreach (var x in Enumerable.Range(0, Voxel.Size))
-                foreach (var y in Enumerable.Range(0, Voxel.Size))
-                foreach (var z in Enumerable.Range(0, Voxel.Size))
-                    vertices[z * Voxel.Size * Voxel.Size + y * Voxel.Size + x] = new VoxelVertex {
-                        Position = new Vector3(x, y, z),
-                        BlockType = (uint) random.Next(0, 6)
-                    };
-                return new[] {
-                    ArrayBuffer.CreateAsVertices(vertices, BufferUsageHint.StaticDraw)
-                };
-            });
-
             _ppo = GL.GenProgramPipeline();
             GL.UseProgramStages(_ppo, ProgramStageMask.VertexShaderBit, Program.Resources.VoxelVS.ProgramID);
             GL.UseProgramStages(_ppo, ProgramStageMask.FragmentShaderBit, Program.Resources.VoxelFS.ProgramID);
         }
 
         public void Dispose() {
-            _vao?.Dispose();
-
+            foreach (var (_, voxel) in Voxels) voxel.Dispose();
             var window = Program.Window;
             window.KeyDown -= OnKeyDown;
             window.KeyUp -= OnKeyUp;
@@ -106,19 +90,16 @@ namespace Voxels {
 
         public void Render() {
             var floats = new float[16];
-            Helper.MatrixToFloats(_camera.CalculateViewProjectionMatrix(), floats);
 
             GL.CullFace(CullFaceMode.Back);
             GL.BindProgramPipeline(_ppo);
-            GL.BindVertexArray(_vao.Vao);
             foreach (var (id, block) in Block.Blocks) {
                 var programID = block.GeometryShader?.ProgramID ?? 0;
                 if (programID == 0) continue;
 
                 GL.UseProgramStages(_ppo, ProgramStageMask.GeometryShaderBit, programID);
 
-                var viewProjLocation = GL.GetUniformLocation(programID, "u_viewProj");
-                GL.ProgramUniformMatrix4(programID, viewProjLocation, 1, true, floats);
+                var mvpLocation = GL.GetUniformLocation(programID, "u_mvp");
 
                 var colorLocation = GL.GetUniformLocation(programID, "u_primaryColor");
                 GL.ProgramUniform3(programID, colorLocation,
@@ -129,9 +110,16 @@ namespace Voxels {
                 var idLocation = GL.GetUniformLocation(programID, "u_blockID");
                 GL.ProgramUniform1((uint) programID, idLocation, id);
 
-                GL.DrawArrays(PrimitiveType.Points, 0, Voxel.BlockCount);
+                foreach (var ((x, y, z), voxel) in Voxels) {
+                    var model = Matrix4.CreateTranslation(x * Voxel.Size, y * Voxel.Size, z * Voxel.Size);
+                    Helper.MatrixToFloats(model * _camera.CalculateViewProjectionMatrix(), floats);
+                    GL.ProgramUniformMatrix4(programID, mvpLocation, 1, true, floats);
+
+                    GL.BindVertexArray(voxel.Vao.Vao);
+                    GL.DrawArrays(PrimitiveType.Points, 0, Voxel.BlockCount);
+                    GL.BindVertexArray(0);
+                }
             }
-            GL.BindVertexArray(0);
             GL.BindProgramPipeline(0);
         }
 
