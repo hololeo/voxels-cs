@@ -47,8 +47,8 @@ namespace Voxels {
 
             var random = new Random(123456);
             _world = new World();
-            for (int x = -10; x < 10; x++)
-            for (int z = -10; z < 10; z++)
+            for (var x = -10; x < 10; x++)
+            for (var z = -10; z < 10; z++)
                 _world.GenerateChunk(x, -1, z, random);
         }
 
