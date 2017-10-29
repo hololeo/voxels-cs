@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel.Design;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using OpenTK;
@@ -8,6 +9,8 @@ using OpenTK.Input;
 
 namespace Voxels {
     public class Program : IDisposable {
+        private const bool IsFullScreen = true;
+
         public static Program Instance { get; private set; }
         public static Resources Resources { get; } = new Resources();
         public static float AspectRatio { get; private set; }
@@ -17,11 +20,17 @@ namespace Voxels {
         private World _world;
 
         private Program() {
+            var display = DisplayDevice.Default;
             Instance = this;
-            _window = new GameWindow(800, 450, GraphicsMode.Default, "Voxels", GameWindowFlags.FixedWindow,
-                DisplayDevice.Default, 4, 6, GraphicsContextFlags.ForwardCompatible | GraphicsContextFlags.Debug) {
-                VSync = VSyncMode.Adaptive, Visible = true
-            };
+            _window = IsFullScreen
+                ? new GameWindow(display.Width, display.Height, GraphicsMode.Default, "Voxels",
+                    GameWindowFlags.Fullscreen, DisplayDevice.Default, 4, 6,
+                    GraphicsContextFlags.ForwardCompatible | GraphicsContextFlags.Debug)
+                : new GameWindow(800, 450, GraphicsMode.Default, "Voxels",
+                    GameWindowFlags.FixedWindow, DisplayDevice.Default, 4, 6,
+                    GraphicsContextFlags.ForwardCompatible | GraphicsContextFlags.Debug);
+            _window.VSync = VSyncMode.Adaptive;
+            _window.Visible = true;
             _window.MakeCurrent();
 
             ConfigureGLDebug();
@@ -29,6 +38,7 @@ namespace Voxels {
             _window.CursorVisible = false;
             _window.KeyDown += (sender, args) => {
                 if (args.Key != Key.Escape) return;
+                if (IsFullScreen) _window.Close();
                 _window.CursorVisible = !_window.CursorVisible;
             };
 
