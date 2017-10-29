@@ -1,7 +1,6 @@
 #version 460 core
 
 #define SIZE 0.499999
-#define BLOCK_TYPE 1
 
 layout (points) in;
 layout (triangle_strip, max_vertices = 24) out;
@@ -9,6 +8,7 @@ layout (triangle_strip, max_vertices = 24) out;
 uniform mat4 u_viewProj;
 uniform vec3 u_primaryColor;
 uniform vec3 u_secondaryColor;
+uniform uint u_blockID;
 
 in gl_PerVertex {
     vec4 gl_Position;
@@ -23,7 +23,7 @@ in uint vtg_btype[];
 out vec3 gtf_color;
 
 void main() {
-    if (vtg_btype[0] != BLOCK_TYPE) return;
+    if (vtg_btype[0] != u_blockID) return;
     
     // Left.
     gtf_color = u_primaryColor;

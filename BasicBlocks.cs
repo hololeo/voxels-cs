@@ -1,9 +1,10 @@
 ﻿using OpenTK;
+using OpenTK.Graphics.OpenGL4;
 
 namespace Voxels {
     public class StoneBlock : Block {
-        public StoneBlock() {
-            PrimaryColor = new Vector3(1.0f, 0.5f, 0.2f);
+        public StoneBlock(Vector3 baseColor) {
+            PrimaryColor = baseColor;
             SecondaryColor = PrimaryColor * 0.75f;
             GeometryShader = Program.Resources.SolidBlockGS;
         }

@@ -40,7 +40,7 @@ namespace Voxels {
                 foreach (var z in Enumerable.Range(0, Voxel.Size))
                     vertices[z * Voxel.Size * Voxel.Size + y * Voxel.Size + x] = new VoxelVertex {
                         Position = new Vector3(x, y, z),
-                        BlockType = (uint) (random.NextDouble() > 0.9 ? 1 : 0)
+                        BlockType = (uint) random.Next(0, 6)
                     };
                 return new[] {
                     ArrayBuffer.CreateAsVertices(vertices, BufferUsageHint.StaticDraw)
@@ -108,6 +108,7 @@ namespace Voxels {
             var floats = new float[16];
             Helper.MatrixToFloats(_camera.CalculateViewProjectionMatrix(), floats);
 
+            GL.CullFace(CullFaceMode.Back);
             GL.BindProgramPipeline(_ppo);
             GL.BindVertexArray(_vao.Vao);
             foreach (var (id, block) in Block.Blocks) {
@@ -120,9 +121,13 @@ namespace Voxels {
                 GL.ProgramUniformMatrix4(programID, viewProjLocation, 1, true, floats);
 
                 var colorLocation = GL.GetUniformLocation(programID, "u_primaryColor");
-                GL.ProgramUniform3(programID, colorLocation, 0.2f, 0.5f, 1.0f);
+                GL.ProgramUniform3(programID, colorLocation,
+                    block.PrimaryColor.X, block.PrimaryColor.Y, block.PrimaryColor.Z);
                 colorLocation = GL.GetUniformLocation(programID, "u_secondaryColor");
-                GL.ProgramUniform3(programID, colorLocation, 0.1f, 0.25f, 0.5f);
+                GL.ProgramUniform3(programID, colorLocation,
+                    block.SecondaryColor.X, block.SecondaryColor.Y, block.SecondaryColor.Z);
+                var idLocation = GL.GetUniformLocation(programID, "u_blockID");
+                GL.ProgramUniform1((uint) programID, idLocation, id);
 
                 GL.DrawArrays(PrimitiveType.Points, 0, Voxel.BlockCount);
             }
