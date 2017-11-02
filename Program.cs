@@ -34,6 +34,8 @@ namespace Voxels {
             _window.MakeCurrent();
 
             ConfigureGLDebug();
+            GL.Enable(EnableCap.DepthTest);
+            GL.DepthFunc(DepthFunction.Lequal);
 
             _window.CursorVisible = false;
             _window.KeyDown += (sender, args) => {
@@ -73,7 +75,7 @@ namespace Voxels {
                 var delta = (float) ((timewatch.Elapsed - lastTime).Ticks / (double) TimeSpan.TicksPerSecond);
                 lastTime = timewatch.Elapsed;
 
-                GL.Clear(ClearBufferMask.ColorBufferBit);
+                GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
                 _world.Update(delta);
                 _world.Render();
